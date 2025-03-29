@@ -13,6 +13,10 @@
 - Create SignUp User Account
 - Implement Sign In user Api
 - Created Redux Store with userSlice
+        ------npm i -D @reduxjs/toolkit
+        -----  npm i react-redux
+
+   
 - Implemented Sign out 
 - Update Profile
 - BugFix: Sign up user displayName and profile picture update
