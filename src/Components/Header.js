@@ -1,45 +1,69 @@
-import { signOut } from "firebase/auth";
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import React, { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { auth } from "../utils/firebase";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addUser, removeUser } from "../utils/userSlice";
+import { LOGO } from "../utils/constants";
 
 const Header = () => {
-  const navigate=useNavigate();
- const user=useSelector((store)=>store.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const user = useSelector((store) => store.user);
 
-  const handleSignOut = () => {
-    // Add Firebase sign-out logic here
-    signOut(auth)
-      .then(() => {
-        // Sign-out successful.
-        navigate("/")
-      })
-      .catch((error) => {
-        // An error happened.
-        navigate("/error")
-      });
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Sign-out error:", error);
+      navigate("/error");
+    }
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        dispatch(addUser({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        }));
+        
+        if (location.pathname === "/") {
+          navigate("/Browser"); // Redirect logged-in user from login page
+        }
+      } else {
+        dispatch(removeUser());
+        
+        if (location.pathname === "/Browser") {
+          navigate("/"); // Redirect logged-out user from protected page
+        }
+      }
+      return ()=>unsubscribe();
+    },[]);
+
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, [dispatch, navigate, location.pathname]);
+
   return (
     <div className="absolute w-screen bg-gradient-to-b from-black px-8 py-2 z-10 flex justify-between">
       <img
-        src="https://help.nflxext.com/helpcenter/OneTrust/oneTrust_production/consent/87b6a5c0-0104-4e96-a291-092c11350111/01938dc4-59b3-7bbc-b635-c4131030e85f/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-053c-46d2-b11e-09adaef973dc/Netflix_Logo_PMS.png"
+        src={LOGO}
         className="w-44"
         alt="header"
       />
-      {user && (<div className="flex p-2">
-        <div className="w-12 h-12 bg-black flex items-center justify-center">
-          <img
-            className="w-12 h-12 "
-            alt="icon"
-            src={user?.photoURL}
-          />
+      {user && (
+        <div className="flex p-2">
+          <div className="w-12 h-12  flex items-center justify-center">
+            <img className="w-12 h-12 rounded-3xl" alt="icon" src={user?.photoURL} />
+          </div>
+          <button className="text-white font-bold ml-4" onClick={handleSignOut}>
+            Sign Out
+          </button>
         </div>
-
-        <button className="text-white font-bold" onClick={handleSignOut}>
-          sign Out
-        </button>
-      </div>)}
+      )}
     </div>
   );
 };

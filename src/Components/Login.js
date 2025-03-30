@@ -10,8 +10,11 @@ import { auth } from "../utils/firebase.js";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice.js";
 import { useNavigate } from "react-router-dom";
+import { BACK_GROUND } from "../utils/constants.js";
 
 const Login = () => {
+  const DEBUG = false;
+
   const [isSignInForm, setisSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -22,6 +25,7 @@ const Login = () => {
   const password = useRef(null);
 
   const handleButtonclick = () => {
+    DEBUG && navigate("/browser");
     const message = checkValidData(
       email?.current?.value,
       password?.current?.value
@@ -43,18 +47,10 @@ const Login = () => {
           updateProfile(user, {
             displayName: name.current.value,
             photoURL:
-              "https://tse3.mm.bing.net/th?id=OIP.abbHwUGf7cWF1KrClYxa5AHaHa&pid=Api&P=0&h=180",
+              "https://lh3.googleusercontent.com/a/ACg8ocLPSots4OUdv3nbzDkizc1ZoLbCL1wD37YkW6XFmoYp7f-n77oL=s519-c-no",
           })
             .then(() => {
               // Profile updated!
-              dispatch(
-                addUser({
-                  uid: user.uid,
-                  email: user.email,
-                  displayName: user.displayName,
-                  photoURL: user.photoURL,
-                })
-              );
               navigate("/browser");
             })
             .catch((error) => {
@@ -129,10 +125,7 @@ const Login = () => {
     <div>
       <Header />
       <div className="absolute">
-        <img
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/42a0bce6-fc59-4c1c-b335-7196a59ae9ab/web/IN-en-20250303-TRIFECTA-perspective_d5f81427-d6cf-412d-8e86-2315671b9be1_large.jpg"
-          alt="back"
-        />
+        <img src={BACK_GROUND} alt="back" />
       </div>
       <form className="absolute p-12 text-white bg-black bg-opacity-80 w-3/12 my-36 mx-auto right-0 left-0 py-6 rounded-2xl ">
         <h1 className="font-bold text-3xl">
@@ -167,7 +160,7 @@ const Login = () => {
           {isSignInForm ? "Sign in" : "Sign up"}
         </button>
         <p
-          className="text-sm text-center cursor-pointer"
+          className="text-sm text-center cursor-pointer text-red-300"
           onClick={toggleSignInForm}
         >
           {isSignInForm
