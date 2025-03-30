@@ -15,7 +15,6 @@ const moviesSlice = createSlice({
       state.popularMovies = action.payload;
     },
     addTrailerVideo: (state, action) => {
-      console.log("Slice", action.payload);
       state.trailerVideo = action.payload;
     },
   },
